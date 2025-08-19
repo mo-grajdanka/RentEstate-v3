@@ -9,6 +9,8 @@
 
   <!-- Poppins + Tailwind -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -54,7 +56,7 @@
       </a>
 
       <!-- ССЫЛКИ -->
-      <a href="#references" class="w-full max-w-xs mx-auto flex items-center justify-between py-2 text-xl">
+      <a href="#news" class="w-full max-w-xs mx-auto flex items-center justify-between py-2 text-xl">
         <span class="tracking-wide">ССЫЛКИ</span>
         <span class="opacity-0 select-none">▾</span>
       </a>
@@ -99,7 +101,7 @@
         <nav class="hidden lg:flex space-x-10 text-gray-800">
           <a href="#home" class="hover:text-yellow-500">ГЛАВНАЯ</a>
           <a href="#services" class="hover:text-yellow-500">УСЛУГИ</a>
-          <a href="#references" class="hover:text-yellow-500">РЕФЕРЕНЦИИ</a>
+          <a href="#news" class="hover:text-yellow-500">Новости</a>
           <a href="#about" class="hover:text-yellow-500">О НАС</a>
         </nav>
 
@@ -1054,26 +1056,262 @@ function motionParam(p, i){
           </h2>
         </div>
       </section>
-    </section>
+
 
 
     <!-- Обычный контент -->
-    <section class="relative mx-auto mb-24 px-4 py-8 max-w-[900px]">
-      <h1 class="font-extrabold text-[clamp(32px,5vw,56px)] mb-4">Контент после шторки</h1>
-      <p>Это обычный поток страницы после эффекта шторки.</p>
+<section id="panoSection" class="relative mx-auto mb-24 px-4 py-8 max-w-[900px]">
+  <h2 id="panoTitle" data-scale-on-scroll data-scale-max="0.10"
+      class="text-center font-extrabold leading-[0.95] tracking-tight
+             text-[clamp(32px,5vw,56px)] mb-6 transition-transform duration-100 ease-out will-change-transform">
+    <span class="paint-word"
+          data-paint-trigger="#panoSection"
+          style="--paint:#a3e635; --base:#000; --p:0%;
+                 background-image:linear-gradient(90deg,var(--paint) var(--p), var(--base) var(--p));
+                 -webkit-background-clip:text; background-clip:text; color:transparent;">
+      Панорама&nbsp;360°
+    </span>
+    • Большая Нева
+  </h2>
+
+  <!-- контейнер под 360 -->
+  <div id="pano"
+       class="w-full h-[320px] sm:h-[380px] md:h-[460px] lg:h-[520px]
+              rounded-xl overflow-hidden ring-1 ring-black/10 bg-black"></div>
+
+  <!-- подпись (атрибуция CC BY-SA 4.0) -->
+  <!-- <p class="mt-4 text-sm text-black/60 text-center">
+    Фото: Wikimedia Commons, CC BY-SA 4.0 —
+    <a class="underline hover:no-underline" target="_blank" rel="noopener"
+       href="https://upload.wikimedia.org/wikipedia/commons/b/b6/%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C_%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%B0%D1%8F_%D0%9D%D0%B5%D0%B2%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%B2%D0%B5%D1%80%D1%84%D1%8F%D0%BC%D0%B8_%D1%81%D1%84%D0%B5%D1%80%D0%BE%D0%BF%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0.jpg">
+      оригинал изображения
+    </a>
+  </p> -->
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const el = document.getElementById('pano');
+  if (!el || !window.pannellum) return;
+
+  /* Точечная метка без ссылки */
+  function rbHotspot(hotSpotDiv, args){
+  hotSpotDiv.classList.add('rb-spot');
+  hotSpotDiv.setAttribute('tabindex','0');
+
+  hotSpotDiv.innerHTML = `
+    <span class="rb-pin" aria-hidden="true"></span>
+    <div class="rb-card" role="dialog" aria-live="polite">
+      ${args.cardTitle ? `<div class="rb-card-title">${args.cardTitle}</div>` : ''}
+      <div class="rb-card-text">${args.cardText || args.text || ''}</div>
+    </div>
+  `;
+
+  // Для тач-устройств показываем по фокусу/тапу
+  hotSpotDiv.addEventListener('click', () => hotSpotDiv.classList.toggle('is-open'));
+  hotSpotDiv.addEventListener('blur',  () => hotSpotDiv.classList.remove('is-open'));
+}
+
+  /* «Полигон» — условная область с клипом и подписью */
+  function rbArea(hotSpotDiv, args){
+  hotSpotDiv.classList.add('rb-area-wrap');
+  hotSpotDiv.setAttribute('tabindex','0');
+
+  const area = document.createElement('div');
+  area.className = 'rb-area';
+  if (args.width)     area.style.width  = args.width + 'px';
+  if (args.height)    area.style.height = args.height + 'px';
+  if (args.clipPath)  area.style.clipPath = args.clipPath;
+
+  const card = document.createElement('div');
+  card.className = 'rb-card rb-card--area';
+  card.innerHTML = `
+    ${args.cardTitle ? `<div class="rb-card-title">${args.cardTitle}</div>` : ''}
+    <div class="rb-card-text">${args.cardText || args.text || ''}</div>
+  `;
+
+  hotSpotDiv.appendChild(area);
+  hotSpotDiv.appendChild(card);
+
+  // Тач: показать/скрыть карточку по тапу
+  hotSpotDiv.addEventListener('click', () => hotSpotDiv.classList.toggle('is-open'));
+  hotSpotDiv.addEventListener('blur',  () => hotSpotDiv.classList.remove('is-open'));
+}
+
+  const viewer = pannellum.viewer('pano', {
+    type: 'equirectangular',
+    crossOrigin: 'anonymous',
+    panorama: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C_%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%B0%D1%8F_%D0%9D%D0%B5%D0%B2%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%B2%D0%B5%D1%80%D1%84%D1%8F%D0%BC%D0%B8_%D1%81%D1%84%D0%B5%D1%80%D0%BE%D0%BF%D0%B0%D0%BD%D0%BE%D1%80%D0%B0%D0%BC%D0%B0.jpg',
+    autoLoad: true,
+    showControls: true,
+    compass: true,
+    yaw: 0, pitch: 0, hfov: 100, minHfov: 60, maxHfov: 120,
+    mouseZoom: true,
+
+    /* Метки: без URL */
+    hotSpots: [
+  { yaw: 95, pitch: -4, createTooltipFunc: rbHotspot,
+    createTooltipArgs: { 
+      text: 'Набережная',
+      cardTitle: 'Набережная',
+      cardText: 'Прогулочная зона, доступ к воде, ориентир для навигации.'
+    } 
+  },
+
+  { yaw: 60, pitch: -2, createTooltipFunc: rbHotspot,
+    createTooltipArgs: { 
+      text: 'Мост',
+      cardTitle: 'Мост',
+      cardText: 'Транспортная артерия. Потоки пешеходов и автомобилей.'
+    } 
+  },
+
+  { yaw: -15, pitch: -3, createTooltipFunc: rbHotspot,
+    createTooltipArgs: { 
+      text: 'Верфи',
+      cardTitle: 'Верфи',
+      cardText: 'Промышленная зона, ограниченный доступ.'
+    } 
+  },
+
+  { yaw: 35, pitch: -6, scale: 1.0, createTooltipFunc: rbArea,
+    createTooltipArgs: {
+      text: 'Площадь застройки (пример)',
+      cardTitle: 'Площадь застройки',
+      cardText: 'Ориентировочно 2 500–3 000 м². Возможна фрагментация.',
+      width: 240, height: 150,
+      clipPath: 'polygon(10% 15%, 95% 10%, 88% 85%, 14% 90%)'
+    } 
+  }
+]
+
+  });
+
+  /* Клик по панораме — координаты в консоль, чтобы легко
+     подбирать yaw/pitch для новых меток / полигона. */
+  el.addEventListener('click', function () {
+    console.log('yaw:', viewer.getYaw().toFixed(1),
+                'pitch:', viewer.getPitch().toFixed(1));
+  });
+});
+</script>
+
+<style>
+  /* Базовый контейнер хотспота — уже есть */
+#pano .rb-spot{ position:absolute; cursor:pointer; outline:none; }
+
+/* Стеклянная карточка (общая) */
+#pano .rb-card{
+  position: absolute;
+  left: 22px;               /* правее пина */
+  top: 50%;
+  transform: translateY(-50%) translateZ(0) scale(.98);
+  max-width: min(52vw, 280px);
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  /* стеклянное белое */
+  background: rgba(255,255,255,.58);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.70);
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.65);
+
+  color: #0b0b0b;
+  font: 500 12px/1.35 Poppins, system-ui;
+
+  opacity: 0;
+  pointer-events: none;
+  z-index: 12;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+/* Заголовок и текст */
+#pano .rb-card-title{
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.25;
+  margin-bottom: 4px;
+  letter-spacing: .2px;
+}
+#pano .rb-card-text{
+  font-weight: 500;
+  opacity: .85;
+}
+
+/* Появление по hover/focus/тапу */
+#pano .rb-spot:hover .rb-card,
+#pano .rb-spot:focus-visible .rb-card,
+#pano .rb-spot.is-open .rb-card{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateZ(0) scale(1);
+}
+
+/* Карточка для полигона — ставим сверху слева, чтобы не перекрывалась */
+#pano .rb-card--area{
+  left: 12px;
+  top: -12px;
+  transform: translateY(-100%) translateZ(0) scale(.98);
+}
+#pano .rb-area-wrap:hover .rb-card--area,
+#pano .rb-area-wrap:focus-visible .rb-card--area,
+#pano .rb-area-wrap.is-open .rb-card--area{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-100%) translateZ(0) scale(1);
+}
+
+/* Пин — как был, можно чуть усилить контраст */
+#pano .rb-spot .rb-pin{
+  display:block; width:14px; height:14px; border-radius:9999px;
+  background:#a3e635;
+  box-shadow:0 0 0 2px #fff, 0 8px 18px rgba(0,0,0,.25);
+  transition:transform .16s ease-out;
+}
+#pano .rb-spot:hover .rb-pin,
+#pano .rb-spot:focus-visible .rb-pin{ transform:scale(1.15); }
+
+/* Полигон как был */
+#pano .rb-area-wrap{ position:absolute; outline:none; z-index: 11; }
+#pano .rb-area{
+  position:relative;
+  width:220px; height:140px;
+  background:rgba(163,230,53,.18);
+  border:2px solid rgba(163,230,53,.6);
+  clip-path:polygon(8% 12%, 95% 6%, 88% 85%, 14% 92%);
+  border-radius:10px;
+  transition:background-color .2s ease, filter .2s ease, transform .2s ease;
+  filter:saturate(.9);
+}
+#pano .rb-area-wrap:hover .rb-area,
+#pano .rb-area-wrap:focus-visible .rb-area{
+  background:rgba(163,230,53,.26);
+  filter:saturate(1);
+}
+
+/* На маленьких экранах карточки компактнее */
+@media (max-width: 480px){
+  #pano .rb-card{
+    max-width: 72vw;
+    padding: 9px 10px;
+    border-radius: 12px;
+  }
+  #pano .rb-card-title{ font-size: 12px; }
+  #pano .rb-card-text{ font-size: 11px; }
+}
+
+</style>
+
+
+
+
+
+
+
     </section>
-
-
-    <!-- Дальше идёт обычный контент сайта -->
-    <section class="content">
-      <article class="content__inner">
-        <h1 class="content__title">Контент после шторки</h1>
-        <p>Это обычный поток страницы, шторка уже закрыла предыдущий блок.</p>
-      </article>
-    </section>
-
-
-
 
 
 
@@ -1233,10 +1471,186 @@ function motionParam(p, i){
 
 
     <!-- ============================================================================================================================================================== -->
-    <!-- дальнейшие секции -->
-    <section id="services" class="p-8">…</section>
-    <section id="references" class="p-8">…</section>
-    <section id="about" class="p-8">…</section>
+
+
+    <!-- ===== NEWS / НОВОСТИ ===== -->
+<section id="news" class="relative w-screen bg-black text-white">
+  <div class="mx-auto max-w-6xl px-6 py-20 md:py-28">
+    <!-- Заголовок: красится и масштабируется при скролле -->
+    <h2 id="newsTitle"
+        data-scale-on-scroll data-scale-max="0.12"
+        class="text-center font-extrabold leading-[0.9] tracking-tight
+               text-[clamp(40px,16vw,144px)]">
+      <span class="paint-word block"
+            data-paint-trigger="#news"
+            style="--paint:#a3e635; --base:#fff; --p:0%;
+                   background-image:linear-gradient(90deg,var(--paint) var(--p), var(--base) var(--p));
+                   -webkit-background-clip:text; background-clip:text; color:transparent;">
+        НОВОСТИ
+      </span>
+    </h2>
+
+    <!-- Карточки -->
+    <div class="mt-12 grid gap-8 sm:gap-10 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Card 1 -->
+      <article class="group ring-1 ring-white/10 hover:ring-white/30 transition overflow-hidden flex flex-col">
+        <a href="#" class="relative block aspect-[16/10] overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=1200&auto=format&fit=crop"
+               alt="ORF1: Разговор о соблазнении в ритейле"
+               class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+        </a>
+        <div class="p-6 flex flex-col grow">
+          <div class="text-white/60 text-sm">15 янв · 1&nbsp;мин. чтения</div>
+          <h3 class="mt-3 text-xl font-semibold leading-snug transition group-hover:text-lime-400">
+            Арндт Трайндль на ORF1: о «соблазнении» в розничной торговле
+          </h3>
+          <p class="mt-3 text-white/70">
+            Документальный фильм «DOK 1: Чтобы покупали — трюки продавцов» раскрывает механики влияния мерчандайзинга и дизайна пространства.
+          </p>
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-sm text-white/60">
+            <span class="inline-flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" stroke="currentColor"/><circle cx="12" cy="12" r="3.25" stroke="currentColor"/></svg>
+              16
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="text-white/40 group-hover:text-lime-400 transition"><path d="M12.1 21.35 10 19.45C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4c1.74 0 3.41.81 4.5 2.09A6 6 0 0 1 12 6c1.09-1.28 2.76-2.09 4.5-2.09A4.5 4.5 0 0 1 21 8.5c0 3.78-3.4 6.86-8 10.95l-.9.9Z"/></svg>
+              2
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="group ring-1 ring-white/10 hover:ring-white/30 transition overflow-hidden flex flex-col">
+        <a href="#" class="relative block aspect-[16/10] overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=1200&auto=format&fit=crop"
+               alt="Запуск новой версии сайта"
+               class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+        </a>
+        <div class="p-6 flex flex-col grow">
+          <div class="text-white/60 text-sm">4 окт. 2024 · 2&nbsp;мин. чтения</div>
+          <h3 class="mt-3 text-xl font-semibold leading-snug transition group-hover:text-lime-400">
+            Новый сайт: быстрее, светлее, удобнее
+          </h3>
+          <p class="mt-3 text-white/70">
+            Представили обновлённый сайт retail branding — акценты на кейсах, услугах и удобной навигации с мобильных.
+          </p>
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-sm text-white/60">
+            <span class="inline-flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" stroke="currentColor"/><circle cx="12" cy="12" r="3.25" stroke="currentColor"/></svg>
+              15
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="text-white/40 group-hover:text-lime-400 transition"><path d="M12.1 21.35 10 19.45C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4c1.74 0 3.41.81 4.5 2.09A6 6 0 0 1 12 6c1.09-1.28 2.76-2.09 4.5-2.09A4.5 4.5 0 0 1 21 8.5c0 3.78-3.4 6.86-8 10.95l-.9.9Z"/></svg>
+              2
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="group ring-1 ring-white/10 hover:ring-white/30 transition overflow-hidden flex flex-col">
+        <a href="#" class="relative block aspect-[16/10] overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1200&auto=format&fit=crop"
+               alt="retail branding на EuroShop"
+               class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+        </a>
+        <div class="p-6 flex flex-col grow">
+          <div class="text-white/60 text-sm">3 окт. 2024 · 1&nbsp;мин. чтения</div>
+          <h3 class="mt-3 text-xl font-semibold leading-snug transition group-hover:text-lime-400">
+            retail branding и 3D Betondruck Solutions на EuroShop, Дюссельдорф
+          </h3>
+          <p class="mt-3 text-white/70">
+            На крупнейшей выставке оформления магазинов представили впечатляющие решения в области 3D-печатных конструкций и дизайна зон.
+          </p>
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-sm text-white/60">
+            <span class="inline-flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" stroke="currentColor"/><circle cx="12" cy="12" r="3.25" stroke="currentColor"/></svg>
+              12
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="text-white/40 group-hover:text-lime-400 transition"><path d="M12.1 21.35 10 19.45C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4c1.74 0 3.41.81 4.5 2.09A6 6 0 0 1 12 6c1.09-1.28 2.76-2.09 4.5-2.09A4.5 4.5 0 0 1 21 8.5c0 3.78-3.4 6.86-8 10.95l-.9.9Z"/></svg>
+              2
+            </span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+
+
+    <section id="about" class="p-8">
+<!-- ===== ФУТЕР ===== -->
+<footer id="siteFooter" class="relative bg-white text-black">
+  <!-- верхняя линия на всю ширину + центральная риска -->
+  <div class="relative mx-[calc(50%-50vw)] border-t border-black/20
+              before:content-[''] before:absolute before:left-1/2 before:-translate-x-1/2
+              before:-top-[9px] before:h-4 before:w-px before:bg-black/60"></div>
+
+  <div class="mx-auto max-w-5xl px-4 pt-8 md:pt-12 pb-0">
+    <div class="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
+      <!-- ЛЕВО: логотип + контакты -->
+      <div>
+        <img src="https://logo.svgcdn.com/l/jruby.svg" alt="retail|branding" class="h-8 mb-6">
+        <p class="mb-3">Адрес: </p>
+        <p class="leading-relaxed">
+          Адрес 8<br>3300 Улица<br> Санкт-Петербург
+        </p>
+
+        <div class="mt-4">
+          <p class="mb-1">WhatsApp / Телефон:</p>
+          <a href="tel:+436643832481" class="underline-offset-4 hover:underline">
+            +43 (0) 664 383 24 81
+          </a>
+        </div>
+
+        <div class="mt-4">
+          <a href="mailto:office@retailbranding.at"
+             class="underline underline-offset-4 decoration-transparent hover:decoration-current">
+            office@retailbranding.at
+          </a>
+        </div>
+      </div>
+
+      <!-- ЦЕНТР: навигация -->
+      <nav class="text-lg md:text-xl" aria-label="Навигация по сайту">
+        <ul class="space-y-2">
+          <li><a href="#home" class="text-lime-500 font-medium">ГЛАВНАЯ</a></li>
+          <li><a href="#services" class="hover:text-lime-600 transition">УСЛУГИ</a></li>
+          <li><a href="#references" class="hover:text-lime-600 transition">РЕФЕРЕНЦИИ</a></li>
+          <li><a href="#about" class="hover:text-lime-600 transition">О&nbsp;НАС</a></li>
+        </ul>
+      </nav>
+
+      <!-- ПРАВО: юр. ссылки -->
+      <div class="md:text-right">
+        <ul class="space-y-2 text-lg md:text-xl">
+          <li><a href="/datenschutz" class="hover:text-lime-600 transition">Политика конфиденциальности</a></li>
+          <li><a href="/impressum"  class="hover:text-lime-600 transition">Импрессум</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- нижняя строка -->
+    <div class="mt-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-sm text-black/60">
+      <p>© <span id="year"></span> retail|branding. Все права защищены.</p>
+      <div class="flex items-center gap-4">
+        <a href="mailto:office@retailbranding.at" class="hover:text-black">Связаться</a>
+        <a href="#" class="hover:text-black">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // текущий год в копирайте
+  (document.getElementById('year')||{}).textContent = new Date().getFullYear();
+</script>
+
+    </section>
   </div>
 
   <!-- логика открытия/закрытия меню -->
